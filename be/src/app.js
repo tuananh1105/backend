@@ -20,11 +20,9 @@ const blogRoutes = require("./routers/blog");
 const customerRoutes = require("./routers/customerRoutes");
 const colorRoutes = require("./routers/color");
 const sizeRoutes = require("./routers/size");
-
+dotenv.config();
 // Database connection
 const { connectDB } = require("./config/db");
-
-dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
