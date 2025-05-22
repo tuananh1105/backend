@@ -1,6 +1,5 @@
 const express = require("express");
 const http = require("http");
-const mongoose = require("mongoose");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -24,7 +23,9 @@ const sizeRoutes = require("./routers/size");
 // Database connection
 const { connectDB } = require("./config/db");
 
+// Load biến môi trường từ .env
 dotenv.config();
+
 const app = express();
 const server = http.createServer(app);
 
@@ -83,16 +84,20 @@ io.on("connection", (socket) => {
   });
 });
 
-// Start server only after DB is connected
+// Lấy port từ biến môi trường hoặc dùng 5000 nếu không có
 const PORT = process.env.PORT || process.env.APP_PORT || 5000;
 
+// In ra để debug biến môi trường DB_URI
+console.log("MongoDB URI:", process.env.DB_URI);
+
+// Kết nối DB rồi mới khởi động server
 connectDB(process.env.DB_URI)
   .then(() => {
-    console.log("✅ MongoDB connected");
     server.listen(PORT, () => {
       console.log(`🚀 Server and Socket.IO running on port ${PORT}`);
     });
   })
   .catch((err) => {
     console.error("❌ MongoDB connection failed:", err);
+    process.exit(1); // thoát app nếu DB ko connect được
   });
