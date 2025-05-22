@@ -1,12 +1,12 @@
+// config/db.js
 const mongoose = require("mongoose");
+
 const connectDB = async (uri) => {
-  try {
-    await mongoose.connect(uri);
-  } catch (error) {
-    console.log(error);
-  }
+  return mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 20000, // Hoặc cao hơn nếu cần
+  });
 };
 
-module.exports = {
-  connectDB,
-};
+module.exports = { connectDB };
