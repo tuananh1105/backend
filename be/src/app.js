@@ -86,13 +86,18 @@ io.on("connection", (socket) => {
 // Start server only after DB is connected
 const PORT = process.env.PORT || process.env.APP_PORT || 5000;
 
-connectDB(process.env.DB_URI)
-  .then(() => {
-    console.log("✅ MongoDB connected");
-    server.listen(PORT, () => {
-      console.log(`🚀 Server and Socket.IO running on port ${PORT}`);
+const connectDB = async (uri) => {
+  try {
+    await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 20000, // Tăng thời gian chờ lên 20 giây
+      maxPoolSize: 10, // Số lượng kết nối tối đa trong pool
+      connectTimeoutMS: 30000, // Thời gian chờ kết nối tối đa (30 giây)
+      socketTimeoutMS: 45000, // Thời gian chờ cho mỗi hoạt động socket (45 giây)
     });
-  })
-  .catch((err) => {
+    console.log("✅ MongoDB connected");
+  } catch (err) {
     console.error("❌ MongoDB connection failed:", err);
-  });
+    throw err; // Ném lỗi để xử lý ở nơi gọi hàm
+  }
+};
+module.exports = connectDB;
