@@ -84,7 +84,7 @@ io.on("connection", (socket) => {
 });
 
 // Start server only after DB is connected
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || process.env.APP_PORT || 5000;
 
 connectDB(process.env.DB_URI)
   .then(() => {
