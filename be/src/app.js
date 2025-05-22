@@ -95,4 +95,4 @@ connectDB(process.env.DB_URI)
   })
   .catch((err) => {
     console.error("❌ MongoDB connection failed:", err);
-  });
+  }); 
