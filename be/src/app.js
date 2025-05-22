@@ -7,7 +7,6 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 
 // Import routes
-// const message = require("./routers/chatRoutes");
 const cartRouter = require("./routers/cart");
 const productRouter = require("./routers/product");
 const categoryRouter = require("./routers/category");
@@ -21,50 +20,30 @@ const blogRoutes = require("./routers/blog");
 const customerRoutes = require("./routers/customerRoutes");
 const colorRoutes = require("./routers/color");
 const sizeRoutes = require("./routers/size");
-// const locationRoutes = require("./routers/address");
 
 // Database connection
 const { connectDB } = require("./config/db");
 
 dotenv.config();
 const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(morgan("dev")); 
-
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "http://localhost:5173", // hoặc domain frontend thực tế khi deploy
+    credentials: true,
   },
 });
-// Socket.IO connection
-io.on("connection", (socket) => {
-  console.log("A client connected:", socket.id);
 
-  // Lắng nghe khi admin cập nhật sản phẩm
-  socket.on("admin-update-product", (data) => {
-    io.emit("update-cart", data);
-  });
+// Middlewares
+app.use(cors());
+app.use(express.json());
+app.use(morgan("dev"));
 
-  // Lắng nghe khi người dùng thay đổi số lượng trong quá trình checkout
-  socket.on("checkout-update-quantity", (data) => {
-    console.log("Checkout quantity updated:", data);
-    io.emit("notify-quantity-change", data);
-  });
-
-  socket.on("admin-send-message", (data) => {
-    console.log("Admin sent a message:", data);
-    io.emit("receive-message", data);
-  });
-
-  // Xử lý khi client ngắt kết nối
-  socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
-  });
+// Test route
+app.get("/", (req, res) => {
+  res.send("✅ API is live!");
 });
-
-connectDB(process.env.DB_URI);
 
 // Routes
 app.use("/api", productRouter);
@@ -76,20 +55,44 @@ app.use("/api", shippingRoutes);
 app.use("/api", couponRoutes);
 app.use("/api", commentRouter);
 app.use("/api", paymentRoutes);
-// app.use("/api", message);
 app.use("/api", blogRoutes);
 app.use("/api", customerRoutes);
 app.use("/api", colorRoutes);
 app.use("/api", sizeRoutes);
-// app.use("/api", locationRoutes);
 
-// Start servers
-const PORT = process.env.PORT || 8081;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// Socket.IO connection
+io.on("connection", (socket) => {
+  console.log("🔌 A client connected:", socket.id);
+
+  socket.on("admin-update-product", (data) => {
+    io.emit("update-cart", data);
+  });
+
+  socket.on("checkout-update-quantity", (data) => {
+    console.log("Checkout quantity updated:", data);
+    io.emit("notify-quantity-change", data);
+  });
+
+  socket.on("admin-send-message", (data) => {
+    console.log("Admin sent a message:", data);
+    io.emit("receive-message", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("🔌 Client disconnected:", socket.id);
+  });
 });
 
-const socketPort = 8080;
-server.listen(socketPort, () => {
-  console.log(`Socket.IO listening on port ${socketPort}`);
-});
+// Start server only after DB is connected
+const PORT = process.env.PORT || 8080;
+
+connectDB(process.env.DB_URI)
+  .then(() => {
+    console.log("✅ MongoDB connected");
+    server.listen(PORT, () => {
+      console.log(`🚀 Server and Socket.IO running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection failed:", err);
+  });
