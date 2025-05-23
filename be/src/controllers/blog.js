@@ -223,12 +223,25 @@ const deletePost = async (req, res) => {
   }
 };
 const uploadBlog = async (req, res) => {
-  const file = req.file;
-  if (!file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
+  try {
+    const file = req.file;
 
-  res.json(file.path);
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: "blogs", 
+    });
+
+    return res.status(200).json({
+      url: result.secure_url, 
+      public_id: result.public_id,
+    });
+  } catch (error) {
+    console.error("Upload to Cloudinary failed:", error);
+    return res.status(500).json({ message: "Cloudinary upload failed" });
+  }
 };
 
 const uploadGalleryBlog = async (req, res) => {
