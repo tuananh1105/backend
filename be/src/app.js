@@ -28,7 +28,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://project-nextjs-qos7.vercel.app/", 
+    origin: "https://project-nextjs-qos7.vercel.app", 
     credentials: true,
   },
 });
