@@ -34,10 +34,7 @@ const io = new Server(server, {
 }); 
 
 // Middlewares
-app.use(cors({
-  origin: "https://project-nextjs-qos7.vercel.app", 
-  credentials: true,
-}));
+app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 
