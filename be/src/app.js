@@ -1,4 +1,6 @@
 const express = require("express");
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 const http = require("http");
 const mongoose = require("mongoose");
 const { Server } = require("socket.io");
@@ -20,30 +22,42 @@ const blogRoutes = require("./routers/blog");
 const customerRoutes = require("./routers/customerRoutes");
 const colorRoutes = require("./routers/color");
 const sizeRoutes = require("./routers/size");
+
 dotenv.config();
-// Database connection
 const { connectDB } = require("./config/db");
+
 const app = express();
-const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: "https://project-nextjs-qos7.vercel.app", 
-    credentials: true,
+// Cấu hình Swagger
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'My API',
+      version: '1.0.0',
+    },
+    servers: [{ url: `http://localhost:${process.env.APP_PORT || 5000}/api` },
+      { url: "https://backend-0xpp.onrender.com/api" }
+    ],
   },
-}); 
+  apis: ['./src/routers/*.js'], // Đường dẫn đúng tới folder routers
+};
+const swaggerSpec = swaggerJsdoc(options);
 
-// Middlewares
+// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
+
+// Swagger UI route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Test route
 app.get("/", (req, res) => {
   res.send("✅ API is live!");
 });
 
-// Routes
+// Các route API
 app.use("/api", productRouter);
 app.use("/api", authRouter);
 app.use("/api", categoryRouter);
@@ -58,7 +72,15 @@ app.use("/api", customerRoutes);
 app.use("/api", colorRoutes);
 app.use("/api", sizeRoutes);
 
-// Socket.IO connection
+// Tạo server HTTP và Socket.IO
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "https://project-nextjs-qos7.vercel.app",
+    credentials: true,
+  },
+});
+
 io.on("connection", (socket) => {
   console.log("🔌 A client connected:", socket.id);
 
@@ -81,16 +103,17 @@ io.on("connection", (socket) => {
   });
 });
 
-// Start server only after DB is connected
-const PORT = process.env.PORT || process.env.APP_PORT || 5000;
+// Kết nối MongoDB rồi mới khởi động server
+const PORT = process.env.APP_PORT || 5000;
 
 connectDB(process.env.DB_URI)
   .then(() => {
     console.log("✅ MongoDB connected");
     server.listen(PORT, () => {
       console.log(`🚀 Server and Socket.IO running on port ${PORT}`);
+      console.log(`🌐 Swagger UI available at http://localhost:${PORT}/api-docs`);
     });
   })
   .catch((err) => {
     console.error("❌ MongoDB connection failed:", err);
-  }); 
+  });
