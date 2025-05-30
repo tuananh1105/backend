@@ -16,7 +16,29 @@ const {
   getAllCustomers, 
 } = require("../controllers/auth");
 const router = express.Router();
+/**
+ * @swagger
+ * /signup:
+ *   post:
+ *     tags:
+ *      - Auth  
+ *     summary: Đăng ký
+ *     responses:
+ *       201:
+ *         description: Thành công
+ */
 router.post(`/signup`, signup);
+/**
+ * @swagger
+ * /signin:
+ *   post:
+ *     tags:
+ *      - Auth  
+ *     summary: Đăng nhập
+ *     responses:
+ *       201:
+ *         description: Thành công
+ */
 router.post(`/signin`, signin);
 router.post("/request-reset-password", requestResetPassword);
 router.post("/check-valid-code", processResetPassword);

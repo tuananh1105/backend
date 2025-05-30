@@ -83,10 +83,10 @@ router.get(`/product`, getProductAll);
 router.post(`/products`, addProduct);
 /**
  * @swagger
- * /products/slug/:slug:
+ * /upload-thumbnail-product:
  *   post:
  *     tags:
- *      - Products  
+ *      - Uploads  
  *     summary: Upload thumbnail sản phẩm
  *     responses:
  *       200:
@@ -99,10 +99,10 @@ router.post(
 );
 /**
  * @swagger
- * /products/slug/:slug:
+ * /upload-variant-product:
  *   post:
  *     tags:
- *      - Products  
+ *      - Uploads  
  *     summary: Upload image variant sản phẩm
  *     responses:
  *       200:
@@ -115,10 +115,10 @@ router.post(
 );
 /**
  * @swagger
- * /products/slug/:slug:
+ * /upload-gallery-product:
  *   post:
  *     tags:
- *      - Products  
+ *      - Uploads  
  *     summary: Upload image gallery sản phẩm
  *     responses:
  *       200:
@@ -143,7 +143,7 @@ router.post(
 router.put(`/products/:id`, updateProduct);
 /**
  * @swagger
- * /products/slug/:slug:
+ * /products/:id:
  *   delete:
  *     tags:
  *      - Products  
